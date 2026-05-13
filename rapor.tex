@@ -171,6 +171,26 @@
 	\section{Findings}
 	The parser was tested with two different grammars.
 	
+	\subsection{Graphviz-Based Visualization}
+	
+	The parser was extended using the Graphviz library to automatically generate visual outputs for parse trees, JSON structures, and syntax errors.
+	
+	For valid sentences:
+	\begin{itemize}
+		\item Parse tree images are generated automatically.
+		\item JSON outputs are converted into image format.
+	\end{itemize}
+	
+	For invalid sentences:
+	\begin{itemize}
+		\item Error visualization images are generated.
+		\item The exact error position and expected tokens are highlighted.
+	\end{itemize}
+	
+	This visualization system improves readability and makes recursive parsing operations easier to understand.
+	
+	
+	
 	\subsection{Grammar 1: Word-Based Grammar}
 	The first grammar was an English-like grammar using noun phrases and verb phrases.
 	
@@ -178,7 +198,7 @@
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.9\textwidth]{grammar1_tree.png}
+		\includegraphics[width=0.9\textwidth]{grammar1_sentence_1_tree.png}
 		\caption{Parse tree generated for the input ``the man saw a dog''}
 	\end{figure}
 	
@@ -186,7 +206,7 @@
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.9\textwidth]{grammar1_json.png}
+		\includegraphics[width=0.9\textwidth]{grammar1_sentence_1_json.png}
 		\caption{JSON representation generated for the input ``the man saw a dog''}
 	\end{figure}
 	
@@ -194,7 +214,7 @@
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=\linewidth]{error_output.png}
+		\includegraphics[width=\linewidth]{grammar1_sentence_5_error.png}
 		\caption{Error message for invalid input ``liked the dog''}
 	\end{figure}
 	
@@ -231,7 +251,7 @@
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=\linewidth]{grammar2_tree.png}
+		\includegraphics[height=0.85\textheight,keepaspectratio]{grammar2_sentence_2_tree.png}
 		\caption{Parse tree for input ``aaaaaaaaaabbbbbbbbbb''}
 	\end{figure}
 	
@@ -239,7 +259,7 @@
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=\linewidth]{grammar2_json.png}
+		\includegraphics[width=\linewidth]{grammar2_sentence_2_json.png}
 		\caption{Compressed JSON output for recursive structure}
 	\end{figure}
 	
@@ -249,9 +269,18 @@
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=0.7\textwidth]{epsilon_output.png}
+		\includegraphics[width=0.7\textwidth]{grammar2_sentence_4_tree.png}
 		\caption{Handling of epsilon (empty string) input}
 	\end{figure}
+	
+	\subsubsection{Error Visualization Example}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.4\textwidth]{grammar2_sentence_6_error.png}
+		\caption{Visualization of syntax error detection for an invalid Grammar 2 sentence}
+	\end{figure}
+	
 	
 	This example demonstrates how the parser handles epsilon (empty string) productions. Even when no input is provided, the parser correctly derives the empty structure using recursive rules.
 	
@@ -319,3 +348,32 @@
 	The source code, grammar files, and input sentence files are included as project attachments.
 	
 \end{document}
+
+\subsubsection{Error Visualization Example}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.4\textwidth]{grammar2_sentence_6_error.png}
+	\caption{Visualization of syntax error detection for an invalid Grammar 2 sentence}
+\end{figure}
+
+
+
+\subsection{Graphviz-Based Visualization}
+
+The parser was extended using the Graphviz library to automatically generate visual outputs for parse trees, JSON structures, and syntax errors.
+
+For valid sentences:
+\begin{itemize}
+	\item Parse tree images are generated automatically.
+	\item JSON outputs are converted into image format.
+\end{itemize}
+
+For invalid sentences:
+\begin{itemize}
+	\item Error visualization images are generated.
+	\item The exact error position and expected tokens are highlighted.
+\end{itemize}
+
+This visualization system improves readability and makes recursive parsing operations easier to understand.
+

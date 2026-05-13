@@ -1,4 +1,5 @@
 import json
+from graphviz import Digraph
 
 
 def load_grammar(filename):
@@ -110,6 +111,97 @@ def print_tree(tree, indent=0):
             print_tree(child, indent + 1)
 
 
+def visualize_tree(tree, filename="parse_tree"):
+    dot = Digraph(format="png")
+    dot.attr(rankdir="TB")
+    dot.attr("node", fontname="Arial")
+
+    counter = {"id": 0}
+
+    def add_node(current_tree, parent_id=None):
+        node_id = str(counter["id"])
+        counter["id"] += 1
+
+        symbol = current_tree["symbol"]
+
+        if current_tree["type"] == "terminal":
+            dot.node(
+                node_id,
+                symbol,
+                shape="box",
+                style="filled",
+                fillcolor="lightblue"
+            )
+        elif current_tree["type"] == "epsilon":
+            dot.node(
+                node_id,
+                symbol,
+                shape="box",
+                style="filled",
+                fillcolor="lightgray"
+            )
+        else:
+            dot.node(
+                node_id,
+                symbol,
+                shape="ellipse"
+            )
+
+        if parent_id is not None:
+            dot.edge(parent_id, node_id)
+
+        if current_tree["type"] == "nonterminal":
+            for child in current_tree["children"]:
+                add_node(child, node_id)
+
+    add_node(tree)
+    dot.render(filename, cleanup=True)
+
+def visualize_json(json_output, filename):
+    dot = Digraph(format="png")
+    dot.attr(rankdir="TB")
+    dot.attr("node", fontname="Consolas")
+
+    json_text = json.dumps(json_output, indent=2, ensure_ascii=False)
+
+    dot.node(
+        "json",
+        json_text,
+        shape="box",
+        style="filled",
+        fillcolor="lightyellow"
+    )
+
+    dot.render(filename, cleanup=True)
+
+def visualize_error(sentence, tokens, error_pos, found_token, expected, filename):
+    dot = Digraph(format="png")
+    dot.attr(rankdir="TB")
+    dot.attr("node", fontname="Arial")
+
+    dot.node("title", f"Invalid Sentence: {sentence}", shape="box", style="filled", fillcolor="lightpink")
+
+    previous = "title"
+
+    for i, token in enumerate(tokens):
+        node_id = f"token_{i}"
+
+        if i == error_pos:
+            label = f"{token}\nERROR HERE\nExpected: {expected}"
+            dot.node(node_id, label, shape="box", style="filled", fillcolor="red", fontcolor="white")
+        else:
+            dot.node(node_id, token, shape="box", style="filled", fillcolor="lightgray")
+
+        dot.edge(previous, node_id)
+        previous = node_id
+
+    if error_pos >= len(tokens):
+        dot.node("end_error", f"END\nERROR HERE\nExpected: {expected}", shape="box", style="filled", fillcolor="red", fontcolor="white")
+        dot.edge(previous, "end_error")
+
+    dot.render(filename, cleanup=True)
+
+
 def compress_recursive_chain(tree):
     if tree["type"] != "nonterminal":
         return None
@@ -192,7 +284,7 @@ def get_start_symbol(grammar):
     return next(iter(grammar))
 
 
-def process_sentence(sentence, grammar, start_symbol):
+def process_sentence(sentence, grammar, start_symbol, label, sentence_no):
     tokens = tokenize_sentence(sentence, grammar)
     best_error = {"pos": -1, "expected": set()}
 
@@ -205,12 +297,20 @@ def process_sentence(sentence, grammar, start_symbol):
         print("Valid")
         print("Parse Tree:")
         print_tree(tree)
+        
+        filename = f"{label}_sentence_{sentence_no}_tree"
+        visualize_tree(tree, filename)
+        print(f"Tree image saved as {filename}.png")
 
         print("\nJSON:")
         json_output = {
             tree["symbol"].replace("<", "").replace(">", ""): tree_to_json(tree)
         }
         print(json.dumps(json_output, indent=2, ensure_ascii=False))
+
+        json_filename = f"{label}_sentence_{sentence_no}_json"
+        visualize_json(json_output, json_filename)
+        print(f"JSON image saved as {json_filename}.png")
         return
 
     print("Invalid")
@@ -227,6 +327,10 @@ def process_sentence(sentence, grammar, start_symbol):
     print(f'- Where the error occurs: token {error_pos + 1} ("{found_token}")')
     print(f"- What was expected: {expected}")
 
+    error_filename = f"{label}_sentence_{sentence_no}_error"
+    visualize_error(sentence, tokens, error_pos, found_token, expected, error_filename)
+    print(f"Error image saved as {error_filename}.png")
+
     if error_pos == 0:
         print("- Why the sentence is invalid: sentence does not match the required starting structure")
     else:
@@ -234,17 +338,19 @@ def process_sentence(sentence, grammar, start_symbol):
 
 
 def main():
-    grammar_file = "grammar1.txt"
-    sentences_file = "sentences1.txt"
+    file_pairs = [
+        ("grammar1.txt", "sentences1.txt", "grammar1"),
+        ("grammar2.txt", "sentences2.txt", "grammar2")
+    ]
 
-    grammar = load_grammar(grammar_file)
-    start_symbol = get_start_symbol(grammar)
+    for grammar_file, sentences_file, label in file_pairs:
+        grammar = load_grammar(grammar_file)
+        start_symbol = get_start_symbol(grammar)
 
-    with open(sentences_file, "r", encoding="utf-8") as file:
-        for line in file:
-            sentence = line.strip()
-            process_sentence(sentence, grammar, start_symbol)
-
+        with open(sentences_file, "r", encoding="utf-8") as file:
+            for sentence_no, line in enumerate(file, start=1):
+                sentence = line.strip()
+                process_sentence(sentence, grammar, start_symbol, label, sentence_no)
 
 if __name__ == "__main__":
     main()
